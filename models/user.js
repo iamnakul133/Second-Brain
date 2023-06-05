@@ -1,3 +1,4 @@
+const express = require("express");
 const pool = require("../config/database/dbConfig");
 
 class User {
@@ -19,11 +20,11 @@ class User {
     }
   }
 
-  static async getByUsername(username) {
-    // Implementation for fetching a user by their username
+  static async getByemail(email) {
+    // Implementation for fetching a user by their email address
     try {
-      const query = "SELECT * FROM users WHERE username = $1";
-      const values = [username];
+      const query = "SELECT * FROM users WHERE email = $1";
+      const values = [email];
       const { rows } = await pool.query(query, values);
 
       return rows;
@@ -33,12 +34,28 @@ class User {
     }
   }
 
-  static async create(username, password) {
+  static async create(email, password) {
+    // Implementation for creating a new user
+    try {
+      const id = uuidv4();
+      const query =
+        "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *";
+      const values = [email, password];
+      const { rows } = await pool.query(query, values);
+
+      return rows[0];
+    } catch (error) {
+      console.error("Error executing query", error);
+      throw error;
+    }
+  }
+
+  static async create(id, email, password, displayName, profile_photo) {
     // Implementation for creating a new user
     try {
       const query =
-        "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *";
-      const values = [username, password];
+        "INSERT INTO users (id, email, password, displayName, profile_photo) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+      const values = [id, email, password, displayName, profile_photo];
       const { rows } = await pool.query(query, values);
 
       return rows[0];
@@ -48,7 +65,5 @@ class User {
     }
   }
 }
-
-// Other methods as per your requirements
 
 module.exports = User;
