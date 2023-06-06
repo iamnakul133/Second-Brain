@@ -1,5 +1,6 @@
 const express = require("express");
 const pool = require("../config/database/dbConfig");
+const { v4: uuidv4 } = require("uuid");
 
 class User {
   static async getById(id) {
@@ -39,8 +40,8 @@ class User {
     try {
       const id = uuidv4();
       const query =
-        "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *";
-      const values = [email, password];
+        "INSERT INTO users (id, email, password) VALUES ($1, $2, $3) RETURNING *";
+      const values = [id, email, password];
       const { rows } = await pool.query(query, values);
 
       return rows[0];
@@ -50,7 +51,7 @@ class User {
     }
   }
 
-  static async create(id, email, password, displayName, profile_photo) {
+  static async creategoogle(id, email, password, displayName, profile_photo) {
     // Implementation for creating a new user
     try {
       const query =

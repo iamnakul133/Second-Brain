@@ -23,5 +23,5 @@ pool.query("SELECT * from posts", (err, results) => {
 });
 
 app.listen(port, () => {
-  console.log("listening on port " + 2000);
+  console.log("listening on port " + 3000);
 });
