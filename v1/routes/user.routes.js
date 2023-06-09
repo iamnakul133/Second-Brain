@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const CatchAsync = require("../../utils/CatchAsync");
-const User = require("../../models/user");
 const authController = require("../controllers/authController");
+const postController = require("../controllers/postController");
 
 // Google authentication routes
 router.get("/auth/google", authController.googleAuth);

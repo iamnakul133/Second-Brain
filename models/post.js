@@ -1,34 +1,16 @@
 const pool = require("../config/database/dbConfig");
 
 class post {
-  constructor(id, title, content, discription, user_id) {
-    this.id = id;
-    this.title = title;
-    this.content = content;
-    this.discription = discription;
-    this.user_id = user_id;
-  }
-
-  static async getAll() {
-    try {
-      const query = "SELECT * FROM posts";
-      const { rows } = await pool.query(query);
-
-      return rows;
-    } catch (error) {
-      console.error("Error executing query", error);
-      throw error;
-    }
-  }
-
   static async getbyUserId(user_id) {
     try {
-      const query = "SELECT * FROM posts where user_id = $1";
+      const query =
+        "SELECT p.*,array_agg(t.Name) AS tags FROM users u INNER JOIN posts p ON u.id = p.user_id LEFT JOIN post_tag pt ON p.id = pt.post_id LEFT JOIN tags t ON pt.id = t.id WHERE u.id = $1 GROUP BY p.id, p.title;";
       const values = [user_id];
       const { rows } = await pool.query(query, values);
       if (rows.length === 0) {
         return null; // post not found
       }
+
       return rows;
     } catch (error) {
       console.error("Error executing query", error);
@@ -36,16 +18,35 @@ class post {
     }
   }
 
-  static async getByTitle(title) {
+  static async getByTitle(user_id, title) {
     try {
-      const query = "SELECT * FROM posts WHERE title = $1";
-      const values = [title];
+      const query =
+        "SELECT p.*,array_agg(t.Name) AS tags FROM users u INNER JOIN posts p ON u.id = p.user_id LEFT JOIN post_tag pt ON p.id = pt.post_id LEFT JOIN tags t ON pt.id = t.id WHERE u.id = $1 AND p.title LIKE '%' || $2 || '%' GROUP BY p.id, p.title;";
+      const values = [user_id, title];
       const { rows } = await pool.query(query, values);
 
       if (rows.length === 0) {
         return null; // Post not found
       }
-      return row[0];
+      return rows;
+    } catch (error) {
+      console.error("Error executing query", error);
+      throw error;
+    }
+  }
+
+  static async getByTag(user_id, tag) {
+    try {
+      console.log(user_id, tag);
+      const query =
+        "SELECT p.*, array_agg(t.Name) AS tags FROM users u INNER JOIN posts p ON u.id = p.user_id INNER JOIN post_tag pt ON p.id = pt.post_id INNER JOIN tags t ON pt.tag_id = t.id WHERE u.id = $1 AND p.id IN ( SELECT p.id FROM posts p INNER JOIN post_tag pt ON p.id = pt.post_id INNER JOIN tags t ON pt.tag_id = t.id WHERE t.Name = $2 ) GROUP BY p.id, p.title;";
+      const values = [user_id, tag];
+      const { rows } = await pool.query(query, values);
+
+      if (rows.length === 0) {
+        return null; // Post not found
+      }
+      return rows;
     } catch (error) {
       console.error("Error executing query", error);
       throw error;

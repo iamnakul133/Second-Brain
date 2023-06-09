@@ -3,7 +3,7 @@ const cors = require("cors");
 const corsOptions = require("./config/constants/corsOpt");
 const session = require("express-session");
 const helmet = require("helmet");
-const routes = require("./v1/routes/routes");
+const routeMap = require("./v1/route.map");
 const app = express();
 const passport = require("passport");
 const passportConfig = require("./services/auth/passport.config");
@@ -26,6 +26,6 @@ passportConfig(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/v1", routes);
+app.use("/v1", routeMap);
 
 module.exports = app;
